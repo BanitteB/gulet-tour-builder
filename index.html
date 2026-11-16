@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build Your Day at Sea</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;0,6..96,700;1,6..96,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Layout: steps on the left, a boarding-pass style "voyage slip" pinned on the right; stacks on phones. */
+  --paper: #EEF3F2;      /* sea mist */
+  --card: #FFFFFF;
+  --ink: #0E2A3B;        /* Aegean night */
+  --muted: #587079;
+  --sea: #1D6B73;        /* turquoise depth */
+  --brass: #A97A22;      /* rope and brass */
+  --line: #C9D6D5;
+  --sea-soft: #DCEBEA;
+  --display: "Bodoni Moda", "Didot", Georgia, serif;
+  --body: "Manrope", "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0B1C26; --card: #11283A; --ink: #E6EEF0; --muted: #93A9B1;
+    --sea: #5BB5BD; --brass: #D7A84A; --line: #24435A; --sea-soft: #16384A;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0B1C26; --card: #11283A; --ink: #E6EEF0; --muted: #93A9B1;
+  --sea: #5BB5BD; --brass: #D7A84A; --line: #24435A; --sea-soft: #16384A;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+header { padding: 40px 24px 8px; max-width: 1180px; margin: 0 auto; }
+.eyebrow { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); font-weight: 700; }
+h1 { font-family: var(--display); font-weight: 500; font-size: clamp(34px, 5vw, 56px); line-height: 1.05; margin: 8px 0 10px; text-wrap: balance; }
+h1 em { color: var(--sea); }
+.lede { color: var(--muted); max-width: 62ch; margin: 0; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 24px; display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 32px; align-items: start; }
+@media (max-width: 900px) { .wrap { grid-template-columns: 1fr; } }
+.step { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 22px; margin-bottom: 20px; }
+.step h2 { font-family: var(--display); font-weight: 500; font-size: 24px; margin: 0 0 4px; display: flex; gap: 12px; align-items: baseline; }
+.step h2 .n { font-family: var(--body); font-size: 12px; font-weight: 700; color: var(--brass); letter-spacing: .1em; }
+.step .hint { color: var(--muted); margin: 0 0 16px; font-size: 14px; }
+.tours { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.opt { position: relative; display: block; border: 1px solid var(--line); border-radius: 12px; padding: 14px 14px 12px; cursor: pointer; background: var(--card); transition: border-color .15s, box-shadow .15s; }
+.opt:hover { border-color: var(--sea); }
+.opt input { position: absolute; opacity: 0; pointer-events: none; }
+.opt:has(input:checked) { border-color: var(--sea); box-shadow: inset 0 0 0 1px var(--sea); background: var(--sea-soft); }
+.opt:has(input:focus-visible) { outline: 2px solid var(--brass); outline-offset: 2px; }
+.opt:has(input:disabled) { opacity: .45; cursor: not-allowed; }
+.opt .t { font-weight: 700; display: block; }
+.opt .time { font-size: 12px; color: var(--sea); font-weight: 600; letter-spacing: .02em; }
+.opt .d { display: block; color: var(--muted); font-size: 13px; margin-top: 4px; }
+.opt .p { display: block; margin-top: 8px; font-variant-numeric: tabular-nums; font-weight: 600; }
+.row { display: flex; flex-wrap: wrap; gap: 16px; }
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 180px; flex: 1; }
+.field label { font-size: 13px; font-weight: 600; }
+input[type="date"], select { font: inherit; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+input[type="date"]:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+.stepper { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; width: fit-content; }
+.stepper button { font: inherit; font-size: 18px; width: 42px; height: 42px; border: 0; background: var(--sea-soft); color: var(--ink); cursor: pointer; }
+.stepper output { min-width: 56px; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+.season { align-self: flex-start; display: inline-block; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--sea-soft); color: var(--sea); margin-top: 8px; }
+.season.peak { background: color-mix(in srgb, var(--brass) 18%, transparent); color: var(--brass); }
+.season.off { background: color-mix(in srgb, var(--muted) 18%, transparent); color: var(--muted); }
+.group { margin-top: 18px; }
+.group h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin: 0 0 8px; }
+.chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.note { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
+
+/* voyage slip */
+.slip { position: sticky; top: 20px; background: var(--ink); color: var(--paper); border-radius: 16px; overflow: hidden; }
+.slip .top { padding: 22px 22px 16px; border-bottom: 2px dashed color-mix(in srgb, var(--paper) 30%, transparent); }
+.slip .label { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; opacity: .7; }
+.slip .tour { font-family: var(--display); font-size: 26px; line-height: 1.15; margin: 4px 0 10px; }
+.slip .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; font-size: 13px; }
+.slip .meta b { display: block; font-size: 15px; }
+.slip .lines { list-style: none; margin: 0; padding: 14px 22px; font-size: 14px; font-variant-numeric: tabular-nums; }
+.slip .lines li { display: flex; justify-content: space-between; gap: 12px; padding: 5px 0; border-bottom: 1px solid color-mix(in srgb, var(--paper) 12%, transparent); }
+.slip .lines li span:last-child { white-space: nowrap; }
+.slip .total { padding: 8px 22px 6px; display: flex; justify-content: space-between; align-items: baseline; }
+.slip .total .amt { font-family: var(--display); font-size: 38px; font-variant-numeric: tabular-nums; color: color-mix(in srgb, var(--brass) 70%, var(--paper)); }
+.slip .sub { padding: 0 22px 16px; font-size: 13px; opacity: .8; display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; }
+.slip .cta { padding: 0 22px 22px; }
+.btn { font: inherit; font-weight: 700; width: 100%; padding: 14px; border-radius: 12px; border: 0; cursor: pointer; background: var(--brass); color: #fff; }
+.btn:hover { filter: brightness(1.07); }
+.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.fine { font-size: 12px; opacity: .65; margin-top: 10px; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .slip { background: #F1F5F4; color: #0E2A3B; } }
+:root[data-theme="dark"] .slip { background: #F1F5F4; color: #0E2A3B; }
+:root[data-theme="dark"] .slip .total .amt { color: #8A6418; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .slip .total .amt { color: #8A6418; } }
+
+dialog { border: 1px solid var(--line); border-radius: 16px; padding: 24px; max-width: 520px; width: calc(100% - 32px); background: var(--card); color: var(--ink); }
+dialog::backdrop { background: rgba(8, 20, 28, .55); }
+dialog h2 { font-family: var(--display); font-weight: 500; margin: 0 0 8px; }
+dialog pre { white-space: pre-wrap; font-family: var(--body); font-size: 13px; background: var(--sea-soft); padding: 12px; border-radius: 10px; max-height: 260px; overflow: auto; }
+.btnrow { display: flex; gap: 10px; margin-top: 12px; }
+footer { max-width: 1180px; margin: 0 auto; padding: 0 24px 40px; color: var(--muted); font-size: 12px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">Private gulet · Gümbet, Bodrum</div>
+  <h1>Build your day <em>at sea</em></h1>
+  <p class="lede">Pick a tour, your date and group, then add what makes it yours. The price updates as you go and always includes 20% KDV.</p>
+</header>
+
+<main class="wrap">
+  <form id="cfg" novalidate>
+    <section class="step" aria-labelledby="s1">
+      <h2 id="s1"><span class="n">01</span> Choose your tour</h2>
+      <p class="hint">Whole boat, private for your group. Base price covers up to 12 guests.</p>
+      <div class="tours" id="tours"></div>
+    </section>
+
+    <section class="step" aria-labelledby="s2">
+      <h2 id="s2"><span class="n">02</span> Date and guests</h2>
+      <p class="hint">Season runs May to October. July and August are peak season.</p>
+      <div class="row">
+        <div class="field">
+          <label for="date">Date</label>
+          <input type="date" id="date" value="2027-06-12" min="2027-05-01" max="2027-10-31">
+          <span id="seasonTag" class="season">Shoulder season</span>
+        </div>
+        <div class="field">
+          <label for="guestsOut">Guests</label>
+          <div class="stepper">
+            <button type="button" id="minus" aria-label="One guest fewer">−</button>
+            <output id="guestsOut" aria-live="polite">14</output>
+            <button type="button" id="plus" aria-label="One guest more">+</button>
+          </div>
+          <p class="note" id="capNote"></p>
+        </div>
+        <div class="field" id="slotField" hidden>
+          <label for="slot">Time slot</label>
+          <select id="slot">
+            <option value="Morning 09:00–13:00">Morning 09:00–13:00</option>
+            <option value="Afternoon 13:30–17:30">Afternoon 13:30–17:30</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="step" aria-labelledby="s3">
+      <h2 id="s3"><span class="n">03</span> Make it yours</h2>
+      <p class="hint">Everything here is optional.</p>
+      <div class="group"><h3>Decoration</h3><div class="chips" id="deco"></div></div>
+      <div class="group"><h3>Drinks</h3><div class="chips" id="drinks"></div></div>
+      <div class="group" id="foodGroup"><h3>Food</h3><div class="chips" id="food"></div></div>
+      <div class="group"><h3>Extras</h3><div class="chips" id="extras"></div></div>
+    </section>
+  </form>
+
+  <aside class="slip" aria-label="Your voyage summary">
+    <div class="top">
+      <div class="label">Your voyage</div>
+      <div class="tour" id="sTour">–</div>
+      <div class="meta">
+        <div>Date<b id="sDate">–</b></div>
+        <div>Guests<b id="sGuests">–</b></div>
+        <div>Departs<b id="sTime">–</b></div>
+        <div>From<b>Gümbet</b></div>
+      </div>
+    </div>
+    <ul class="lines" id="sLines"></ul>
+    <div class="total"><span class="label">Total</span><span class="amt" id="sTotal">€0</span></div>
+    <div class="sub"><span id="sPP">€0 per guest</span><span id="sDep">30% deposit €0</span></div>
+    <div class="cta">
+      <button class="btn" type="button" id="request">Request this tour</button>
+      <p class="fine">Prices incl. 20% KDV. Prototype with planning prices; final price confirmed with your booking.</p>
+    </div>
+  </aside>
+</main>
+
+<footer>Prototype for planning. Prices, times and capacities are first estimates and will change.</footer>
+
+<dialog id="dlg" aria-labelledby="dlgTitle">
+  <h2 id="dlgTitle">Your tour request</h2>
+  <p class="note">In the live version this request goes straight to us and we confirm availability. In this prototype, copy the summary to see what we would receive.</p>
+  <pre id="dlgText"></pre>
+  <div class="btnrow">
+    <button class="btn" type="button" id="copy">Copy summary</button>
+    <button class="btn ghost" type="button" id="close">Close</button>
+  </div>
+  <p class="note" id="copyMsg" aria-live="polite"></p>
+</dialog>
+
+<script>
+(function () {
+  const BASE_GUESTS = 12;
+  // prices: [shoulder, peak] in EUR incl. KDV
+  const TOURS = [
+    { id: "breakfast", name: "Breakfast Cruise", time: "08:30–12:30", desc: "Turkish breakfast at anchor in a calm bay, then a swim.", base: [600, 750], extra: [30, 35], max: 40 },
+    { id: "halfday", name: "Half-Day Private Tour", time: "4 hours", desc: "Two swim bays, fruit, snacks and soft drinks.", base: [550, 700], extra: [25, 30], max: 53, slot: true },
+    { id: "fullday", name: "Full-Day Private Tour", time: "10:00–17:00", desc: "Three bays, fresh lunch cooked on board, snorkels.", base: [850, 1100], extra: [40, 50], max: 53 },
+    { id: "sunset", name: "Sunset Cruise", time: "18:00–21:00", desc: "Anchor for golden hour, back past the lit castle.", base: [500, 650], extra: [25, 30], max: 53 },
+    { id: "dinner", name: "Sunset Dinner", time: "18:30–22:00", desc: "White-linen tables, a choice of menu, relaxed music.", base: [900, 1100], pp: [70, 80], max: 30 },
+    { id: "mystery", name: "Murder Mystery Dinner", time: "18:30–22:30", desc: "Dinner with a crime to solve. Everyone gets a role.", base: [1000, 1200], pp: [95, 110], max: 30, min: 8 }
+  ];
+  const DECO = [
+    { id: "none", name: "No decoration", price: 0 },
+    { id: "basic", name: "Basic", desc: "Banner, table decor, candles, fairy lights", price: 200 },
+    { id: "premium", name: "Premium", desc: "Basic + fresh flowers, photo arch, coloured linen", price: 500 },
+    { id: "proposal", name: "Proposal", desc: "Flower heart, “Marry me” sign, rose petals, champagne", price: 750 }
+  ];
+  const DRINKS = [
+    { id: "soft", name: "Soft drinks, tea and coffee", pp: 0 },
+    { id: "wine", name: "Wine and beer", pp: 25 },
+    { id: "allin", name: "All-inclusive bar", desc: "Wine, beer, rakı, cocktails", pp: 45 }
+  ];
+  const FOOD = [
+    { id: "lunch", name: "Add lunch", desc: "Fresh lunch cooked on board", pp: 20, only: ["halfday"] },
+    { id: "meze", name: "Meze platter", desc: "Mixed Aegean meze", pp: 15, only: ["sunset"] }
+  ];
+  const EXTRAS = [
+    { id: "cake", name: "Celebration cake", price: 70 },
+    { id: "champ", name: "Bottle of champagne", price: 90 },
+    { id: "photo", name: "Photographer (2 hours)", price: 250 },
+    { id: "drone", name: "Drone video", price: 200 },
+    { id: "music", name: "Live musician", desc: "Guitar or saxophone", price: 300, only: ["sunset", "dinner", "mystery", "fullday"] },
+    { id: "actors", name: "Two actors", desc: "Victim and inspector join the game", price: 250, only: ["mystery"] },
+    { id: "sup", name: "SUP board", price: 40, only: ["breakfast", "halfday", "fullday"] },
+    { id: "transfer", name: "Hotel transfer", desc: "Minibus, both ways", price: 120 }
+  ];
+
+  const state = { tour: "fullday", guests: 14, deco: "none", drinks: "soft", food: new Set(), extras: new Set() };
+  const eur = n => "€" + Math.round(n).toLocaleString("en-US");
+  const $ = id => document.getElementById(id);
+
+  function season() {
+    const v = $("date").value;
+    const m = v ? Number(v.slice(5, 7)) : 6;
+    if (m === 7 || m === 8) return { i: 1, label: "Peak season", cls: "peak" };
+    if (m >= 5 && m <= 10) return { i: 0, label: "Shoulder season", cls: "" };
+    return { i: 0, label: "Outside season – on request", cls: "off" };
+  }
+  const tour = () => TOURS.find(t => t.id === state.tour);
+
+  function radio(name, id, checked, html, disabled) {
+    return `<label class="opt"><input type="radio" name="${name}" value="${id}" ${checked ? "checked" : ""} ${disabled ? "disabled" : ""}>${html}</label>`;
+  }
+  function check(name, id, checked, html, disabled) {
+    return `<label class="opt"><input type="checkbox" name="${name}" value="${id}" ${checked ? "checked" : ""} ${disabled ? "disabled" : ""}>${html}</label>`;
+  }
+
+  function renderOptions() {
+    const s = season().i;
+    $("tours").innerHTML = TOURS.map(t => radio("tour", t.id, t.id === state.tour,
+      `<span class="time">${t.time}</span><span class="t">${t.name}</span><span class="d">${t.desc}</span>
+       <span class="p">from ${eur(t.base[s])}${t.pp ? " + " + eur(t.pp[s]) + " pp menu" : ""}</span>`)).join("");
+    $("deco").innerHTML = DECO.map(d => radio("deco", d.id, d.id === state.deco,
+      `<span class="t">${d.name}</span>${d.desc ? `<span class="d">${d.desc}</span>` : ""}<span class="p">${d.price ? "+" + eur(d.price) : "–"}</span>`)).join("");
+    $("drinks").innerHTML = DRINKS.map(d => radio("drinks", d.id, d.id === state.drinks,
+      `<span class="t">${d.name}</span>${d.desc ? `<span class="d">${d.desc}</span>` : ""}<span class="p">${d.pp ? "+" + eur(d.pp) + " per guest" : "Included"}</span>`)).join("");
+    const foods = FOOD.filter(f => f.only.includes(state.tour));
+    $("foodGroup").hidden = foods.length === 0;
+    $("food").innerHTML = foods.map(f => check("food", f.id, state.food.has(f.id),
+      `<span class="t">${f.name}</span><span class="d">${f.desc}</span><span class="p">+${eur(f.pp)} per guest</span>`)).join("");
+    $("extras").innerHTML = EXTRAS.filter(x => !x.only || x.only.includes(state.tour)).map(x => check("extras", x.id, state.extras.has(x.id),
+      `<span class="t">${x.name}</span>${x.desc ? `<span class="d">${x.desc}</span>` : ""}<span class="p">+${eur(x.price)}</span>`)).join("");
+  }
+
+  function clean() {
+    const t = tour();
+    state.guests = Math.min(Math.max(state.guests, t.min || 1), t.max);
+    for (const f of [...state.food]) { const o = FOOD.find(x => x.id === f); if (!o.only.includes(t.id)) state.food.delete(f); }
+    for (const e of [...state.extras]) { const o = EXTRAS.find(x => x.id === e); if (o.only && !o.only.includes(t.id)) state.extras.delete(e); }
+  }
+
+  function lines() {
+    const t = tour(), s = season().i, g = state.guests, L = [];
+    L.push([`${t.name}, up to ${BASE_GUESTS} guests`, t.base[s]]);
+    if (t.extra && g > BASE_GUESTS) L.push([`${g - BASE_GUESTS} extra guests × ${eur(t.extra[s])}`, (g - BASE_GUESTS) * t.extra[s]]);
+    if (t.pp) L.push([`Dinner menu ${g} × ${eur(t.pp[s])}`, g * t.pp[s]]);
+    const dk = DRINKS.find(d => d.id === state.drinks);
+    if (dk.pp) L.push([`${dk.name} ${g} × ${eur(dk.pp)}`, g * dk.pp]);
+    for (const f of state.food) { const o = FOOD.find(x => x.id === f); L.push([`${o.name} ${g} × ${eur(o.pp)}`, g * o.pp]); }
+    const dc = DECO.find(d => d.id === state.deco);
+    if (dc.price) L.push([`Decoration: ${dc.name}`, dc.price]);
+    for (const e of state.extras) { const o = EXTRAS.find(x => x.id === e); L.push([o.name, o.price]); }
+    return L;
+  }
+
+  function update() {
+    clean();
+    const t = tour(), se = season(), L = lines();
+    const total = L.reduce((a, l) => a + l[1], 0);
+    $("guestsOut").textContent = state.guests;
+    $("seasonTag").textContent = se.label;
+    $("seasonTag").className = "season " + se.cls;
+    $("capNote").textContent = `${t.min ? "Min. " + t.min + ", " : ""}max. ${t.max} guests for this tour.`;
+    $("slotField").hidden = !t.slot;
+    $("sTour").textContent = t.name;
+    const d = $("date").value ? new Date($("date").value + "T12:00:00") : null;
+    $("sDate").textContent = d ? d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" }) : "Choose a date";
+    $("sGuests").textContent = state.guests;
+    $("sTime").textContent = t.slot ? $("slot").value.split(" ")[1] : t.time;
+    $("sLines").innerHTML = L.map(l => `<li><span>${l[0]}</span><span>${eur(l[1])}</span></li>`).join("");
+    $("sTotal").textContent = eur(total);
+    $("sPP").textContent = `${eur(total / state.guests)} per guest`;
+    $("sDep").textContent = `30% deposit ${eur(total * 0.3)}`;
+    return { t, L, total, d };
+  }
+
+  function refresh() { clean(); renderOptions(); update(); }
+
+  document.getElementById("cfg").addEventListener("change", e => {
+    const el = e.target;
+    if (el.name === "tour") { state.tour = el.value; refresh(); return; }
+    if (el.name === "deco") state.deco = el.value;
+    if (el.name === "drinks") state.drinks = el.value;
+    if (el.name === "food") el.checked ? state.food.add(el.value) : state.food.delete(el.value);
+    if (el.name === "extras") el.checked ? state.extras.add(el.value) : state.extras.delete(el.value);
+    if (el.id === "date") { renderOptions(); }
+    update();
+  });
+  document.getElementById("cfg").addEventListener("submit", e => e.preventDefault());
+  $("minus").addEventListener("click", () => { state.guests--; update(); });
+  $("plus").addEventListener("click", () => { state.guests++; update(); });
+
+  $("request").addEventListener("click", () => {
+    const r = update();
+    const text = [
+      `Tour: ${r.t.name}${r.t.slot ? " (" + $("slot").value + ")" : ""}`,
+      `Date: ${$("sDate").textContent}`,
+      `Guests: ${state.guests}`,
+      "",
+      ...r.L.map(l => `${l[0]}: ${eur(l[1])}`),
+      "",
+      `Total incl. 20% KDV: ${eur(r.total)}`,
+      `Deposit (30%): ${eur(r.total * 0.3)}`
+    ].join("\n");
+    $("dlgText").textContent = text;
+    $("copyMsg").textContent = "";
+    $("dlg").showModal();
+  });
+  $("close").addEventListener("click", () => $("dlg").close());
+  $("copy").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText($("dlgText").textContent); $("copyMsg").textContent = "Summary copied."; }
+    catch (err) { $("copyMsg").textContent = "Copying is blocked here. Select the text above and copy it manually."; }
+  });
+
+  // example state so the page opens in a realistic working state
+  state.extras.add("cake");
+  state.deco = "basic";
+  refresh();
+})();
+</script>
+</body>
+</html>
